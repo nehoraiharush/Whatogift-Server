@@ -9,8 +9,14 @@ app.use(bp.json());
 
 const mongoUrl = `mongodb+srv://whatogift-user:OfrEUSWM6hk5pIwr@cluster0.krcbrvl.mongodb.net/whatogiftdb?retryWrites=true&w=majority`;
 
+//CONTROLLERS
 import accountControl from './controllers/account.js';
 app.use('/api/account', accountControl);
+
+import companyControl from './controllers/company.js';
+app.use('/api/company', companyControl);
+
+
 
 const port = 3001;
 
