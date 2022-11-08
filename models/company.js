@@ -7,7 +7,7 @@ const companySchema = new Schema({
     associateId: { type: mongoose.Schema.Types.ObjectId, ref: 'Account', },
     companyName: { type: String, required: true },
     contact: {
-        adress: String,
+        address: String,
         city: String,
         state: String,
         zipcode: String,
