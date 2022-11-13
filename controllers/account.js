@@ -3,6 +3,7 @@ const router = express.Router();
 import mongoose from 'mongoose';
 import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import Auth from './auth.js';
 
 import Account from '../models/account.js';
 
@@ -108,24 +109,31 @@ router.post('/login', async (req, res) => {
     //check if user exist and password match
     Account.findOne({ email: email })
         .then(async account => {
-            const isMatch = await bcryptjs.compare(password, account.password);
-            if (isMatch && account.isVerified) {
+            if (account) {
+                const isMatch = await bcryptjs.compare(password, account.password);
+                if (isMatch && account.isVerified) {
 
-                const keyToken = 'm1eIkEjW6Jl64pYbuXsrXixLJpfupNbT';
-                const data = { account };
-                //generate jwt token
-                const token = await jwt.sign(data, keyToken);
+                    const keyToken = 'm1eIkEjW6Jl64pYbuXsrXixLJpfupNbT';
+                    const data = { account };
+                    //generate jwt token
+                    const token = await jwt.sign(data, keyToken);
 
-                return res.status(200).json({
-                    status: true,
-                    message: account,
-                    token: token
-                });
+                    return res.status(200).json({
+                        status: true,
+                        message: account,
+                        token: token
+                    });
 
+                } else {
+                    return res.status(200).json({
+                        status: false,
+                        message: 'Password not match or account not verified'
+                    });
+                }
             } else {
                 return res.status(200).json({
                     status: false,
-                    message: 'Password not match or account not verified'
+                    message: 'Account not found'
                 });
             }
         })
@@ -243,6 +251,12 @@ router.post('/update_password', async (req, res) => {
                 message: err.message
             });
         });
+});
+
+router.get('/getOverView', Auth, async (req, res) => {
+    return res.status(200).json({
+        message: `hello ${req.user.firstName} ${req.user.lastName}`
+    });
 });
 
 
