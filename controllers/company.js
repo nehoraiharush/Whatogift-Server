@@ -4,76 +4,85 @@ import Account from '../models/account.js';
 import Company from '../models/company.js';
 import mongoose from 'mongoose';
 import bcryptjs from 'bcryptjs';
+import Auth from './auth.js';
 
 //update account
-router.post('/create_company', async (req, res) => {
+router.post('/create_company', Auth, async (req, res) => {
     //check if comoany exist under the associate id
 
-    const { email, password, companyName } = req.body;
+    const user = req.user;
+    const { companyName, contact } = req.body;
 
-    if (email == '' || password == '' || companyName == '') {
+    if (companyName == '') {
         return res.status(200).json({
             status: false,
             message: 'One or more of the details is missing'
         });
     }
 
-    const _id = mongoose.Types.ObjectId();
+    const company = await Company.find({ associateId: user._id });
+    if (company.length > 0) {
+        return res.status(200).json({
+            status: false,
+            message: 'Company exist'
+        });
+    } else {
+        //CREATE COMPANY
+        const id = mongoose.Types.ObjectId();
+        const _company = new Company({
+            _id: id,
+            companyName: companyName,
+            associateId: user._id,
+            contact: contact,
+            bio: ''
 
-    //account exist
-    Account.findOne({ email: email })
-        .then(async account => {
-            //company exist by name
-            Company.findOne({ companyName: companyName })
-                .then(company_exist_byName => {
-                    if (company_exist_byName) {
+        });
+        _company.save()
+            .then(company_created => {
+                return res.status(200).json({
+                    status: true,
+                    message: company_created
+                });
+            })
+            .catch(err => {
+                return res.status(200).json({
+                    status: false,
+                    message: err.message
+                });
+            });
+    }
+});
 
-                        return res.status(200).json({
-                            status: false,
-                            message: 'Company Name already taken'
-                        });
+//update account
+router.post('/update_company', Auth, async (req, res) => {
 
-                    } else {
-                        //company exist by associateId
-                        Company.findOne({ associateId: account._id })
-                            .then(async company_exist_byAssociateId => {
+    const user = req.user;
+    const { id, address, city, state, zipcode, mobile, latitude,
+        longitude, logo, bio } = req.body;
 
-                                if (company_exist_byAssociateId) {
-                                    return res.status(200).json({
-                                        status: false,
-                                        message: `The account already has a company ${company_exist_byAssociateId}`
-                                    });
-                                } else {
 
-                                    const _company = new Company({
-                                        _id: _id,
-                                        associateId: account,
-                                        companyName: companyName
-                                    });
-                                    _company.save()
-                                        .then(company_created => {
-                                            return res.status(200).json({
-                                                ststus: true,
-                                                message: company_created
-                                            });
-                                        })
-                                        .catch(err => {
-                                            return res.status(500).json({
-                                                status: false,
-                                                message: err.message
-                                            });
-                                        });
-
-                                }
-                            })
-                            .catch(err => {
-                                return res.status(500).json({
-                                    status: false,
-                                    message: err.message
-                                });
-                            });
-
-                    }
+    const company = await Company.findById(id);
+    if (company) {
+        const account_accociated = await Company.findOne({ associateId: user._id })
+        if (account_accociated) {
+            company.updateOne({
+                contact: {
+                    address: address,
+                    city: city,
+                    state: state,
+                    zipcode: zipcode,
+                    mobile: mobile,
+                    latitude: latitude,
+                    longitude: longitude
+                },
+                logo: logo,
+                bio: bio
+            })
+                .then(async company_updated => {
+                    return res.status(200).json({
+                        status: true,
+                        message: company_updated
+                    });
                 })
                 .catch(err => {
                     return res.status(500).json({
@@ -81,91 +90,18 @@ router.post('/create_company', async (req, res) => {
                         message: err.message
                     });
                 });
-
-
-        })
-        .catch(err => {
+        } else {
             return res.status(500).json({
                 status: false,
-                message: err.message
+                message: `Account is not associated with the company '${company.companyName}'}`
             });
-        });
-
-});
-
-//update account
-router.post('/update_company', async (req, res) => {
-
-    const { email, password, companyName, address, city,
-        state, zipcode, mobile, latitude, longitude, logo, bio } = req.body;
-
-    if (email == '' || password == '' || companyName == '') {
-        return res.status(200).json({
+        }
+    } else {
+        return res.status(500).json({
             status: false,
-            message: 'One or more of the details is missing'
+            message: "Company not found"
         });
     }
-
-    Account.findOne({ email: email })
-        .then(async account => {
-            const isMatch = await bcryptjs.compare(password, account.password);
-            if (isMatch && account.isVerified) {
-                Company.findOne({ companyName: companyName })
-                    .then(async company_exist => {
-                        if (JSON.stringify(company_exist.associateId) == JSON.stringify(account._id)) {
-                            company_exist.updateOne({
-                                contact: {
-                                    address: address,
-                                    city: city,
-                                    state: state,
-                                    zipcode: zipcode,
-                                    mobile: mobile,
-                                    latitude: latitude,
-                                    longitude: longitude
-                                },
-                                logo: logo,
-                                bio: bio
-                            })
-                                .then(async company_updated => {
-                                    return res.status(200).json({
-                                        status: true,
-                                        message: company_updated
-                                    });
-                                })
-                                .catch(err => {
-                                    return res.status(500).json({
-                                        status: false,
-                                        message: err.message
-                                    });
-                                });
-                        } else {
-                            return res.status(200).json({
-                                ststus: false,
-                                message: `${account.firstName} ${account.lastName} doesn't associate with '${companyName}'`
-                            });
-                        }
-                    })
-                    .catch(err => {
-                        return res.status(500).json({
-                            status: false,
-                            message: err.message
-                        });
-                    });
-
-            } else {
-                return res.status(200).json({
-                    status: false,
-                    message: 'Invalid password'
-                });
-            }
-
-        })
-        .catch(err => {
-            return res.status(500).json({
-                status: false,
-                message: err.message
-            });
-        })
 
 });
 
