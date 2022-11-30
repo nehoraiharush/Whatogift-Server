@@ -10,7 +10,7 @@ import Category from '../models/category.js';
 import Product from '../models/product.js';
 
 
-
+//GET BRAND SWAGGER
 /**
  * @swagger
  * /api/product/get_all_brands:
@@ -50,8 +50,85 @@ router.get('/get_all_brands', async (req, res) => {
             })
         });
 });
+//GET BRAND SWAGGER
+/**
+ * @swagger
+ * /api/product/get_brand_by_id/{id}:
+ *  get:
+ *      summary: Get brand name by id
+ *      tags: [Products]
+ *      parameters:
+ *        - in: path
+ *          name: id
+ *          schema:
+ *              type: string
+ *          required: true
+ *      responses:
+ *          200:
+ *              description: Brand Returned
+ *          500:
+ *              description: Error occured
+ */
 
-router.post('/create_new_brand', Auth, async (req, res) => {
+router.get('/get_brand_by_id/:id', async (req, res) => {
+    Brand.findById(req.params.id)
+        .then(brand => {
+            if (brand) {
+                return res.status(200).json({
+                    status: true,
+                    message: brand
+                })
+            } else {
+                return res.status(200).json({
+                    status: false,
+                    message: 'No brands exist'
+                })
+            }
+        })
+        .catch(err => {
+            return res.status(500).json({
+                status: false,
+                message: err.message
+            })
+        });
+});
+//POST BRAND SWAGGER
+/**
+ * @swagger
+ * definitions:
+ *  Brand:
+ *      type: object
+ *      properties:
+ *          brandName: 
+ *              type: string
+ *              description: The name of the brand
+ *              example: Nike
+ *          brandLogo: 
+ *              type: string
+ *              description: The url of the brand's image
+ *              example: nike_logo.png
+ */
+
+/**
+ * @swagger
+ * /api/product/create_new_brand:
+ *  post:
+ *      summary: Create new brand
+ *      description: Use this Endpoint to create new brand
+ *      tags: [Products]
+ *      requestBody:
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      $ref: '#/definitions/Brand'
+ *      responses:
+ *          200:
+ *              decription: Brand Created
+ *          500:
+ *              description: Error in create
+ */
+//NEED TO RETURN THE AUTH
+router.post('/create_new_brand', async (req, res) => {
     const id = mongoose.Types.ObjectId();
 
     const { brandName, brandLogo } = req.body;
@@ -168,6 +245,23 @@ router.post('/create_new_category', Auth, async (req, res) => {
             });
         });
 });
+
+/**
+ * @swagger
+ * /api/product/get_all_products:
+ *  get:
+ *      summary: Return a list of all products
+ *      tags: [Products]
+ *      responses: 
+ *          200:
+ *              description: OK successfull
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: array
+ *          500:
+ *              description: Error was found
+ */
 
 router.get('/get_all_products', async (req, res) => {
     Product.find()
