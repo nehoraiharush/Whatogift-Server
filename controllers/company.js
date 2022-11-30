@@ -105,5 +105,21 @@ router.post('/update_company', Auth, async (req, res) => {
 
 });
 
+router.get('/get_companies', Auth, async (req, res) => {
+
+    Company.find()
+        .then(companies => {
+            return res.status(200).json({
+                message: companies
+            });
+        })
+        .catch(err => {
+            return res.status(500).json({
+                message: err.message
+            });
+        })
+
+});
+
 
 export default router;

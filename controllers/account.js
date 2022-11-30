@@ -34,6 +34,7 @@ router.post('/signUp', async (req, res) => {
                 console.log(code);
                 const _account = new Account({
                     _id: _id,
+                    managerId: _id,
                     email: email,
                     password: hash,
                     firstName: firstName,

@@ -16,6 +16,9 @@ app.use('/api/account', accountControl);
 import companyControl from './controllers/company.js';
 app.use('/api/company', companyControl);
 
+import productControl from './controllers/product.js';
+app.use('/api/product', productControl);
+
 
 
 const port = 3001;
