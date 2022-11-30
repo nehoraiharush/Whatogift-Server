@@ -9,7 +9,26 @@ import Brand from '../models/brand.js';
 import Category from '../models/category.js';
 import Product from '../models/product.js';
 
-router.get('/get_all_brands', Auth, async (req, res) => {
+
+
+/**
+ * @swagger
+ * /api/product/get_all_brands:
+ *  get:
+ *      summary: Return a list of all brands
+ *      tags: [Products]
+ *      responses: 
+ *          200:
+ *              description: This is the list of all brands
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: array
+ *          500:
+ *              description: Error was found
+ */
+
+router.get('/get_all_brands', async (req, res) => {
     Brand.find()
         .then(brands => {
             if (brands.length > 0) {
@@ -81,7 +100,7 @@ router.post('/create_new_brand', Auth, async (req, res) => {
 
 });
 
-router.get('/get_all_categories', Auth, async (req, res) => {
+router.get('/get_all_categories', async (req, res) => {
     Category.find()
         .then(category_exists => {
             if (category_exists.length > 0) {
@@ -150,7 +169,7 @@ router.post('/create_new_category', Auth, async (req, res) => {
         });
 });
 
-router.get('/get_all_products', Auth, async (req, res) => {
+router.get('/get_all_products', async (req, res) => {
     Product.find()
         .then(products_exist => {
             if (products_exist.length > 0) {
