@@ -7,6 +7,65 @@ import Auth from './auth.js';
 
 import Account from '../models/account.js';
 
+//DEFINITIONS
+/**
+ * @swagger
+ * definitions:
+ *  Login:
+ *      type: object
+ *      properties:
+ *          email:
+ *              type: string
+ *              example: nehorai@gmail.com
+ *          password:
+ *              type: string
+ *              example: 123456
+ *  Register:
+ *      type: object
+ *      properties:
+ *          firstName:
+ *              type: string
+ *              example: nehorai
+ *          lastName:
+ *              type: string
+ *              example: harush
+ *          email:
+ *              type: string
+ *              example: nehorai@gmail.com
+ *          password:
+ *              type: string
+ *              example: 123456
+ *  Verify:
+ *      type: object
+ *      properties:
+ *          email:
+ *              type: string
+ *              example: nehorai@gmail.com
+ *          code:
+ *              type: string
+ *              example: 1234    
+ */
+
+//SIGNUP SWAGGER
+/**
+ * @swagger
+ * /api/account/signUp:
+ *  post:
+ *      summary: Create new account
+ *      tags: [Account]
+ *      description: Use this endpoiny to create new account
+ *      requestBody:
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      $ref: '#/definitions/Register'
+ *      responses:
+ *          200:
+ *              description: New account created
+ *          500:
+ *              description: Some error occured
+ */
+
 
 router.post('/signUp', async (req, res) => {
 
@@ -66,6 +125,26 @@ router.post('/signUp', async (req, res) => {
     //send verivication code
 });
 
+//VERIFY SWAGGER
+/**
+ * @swagger
+ * /api/account/verify:
+ *  post:
+ *      summary: Verify account
+ *      tags: [Account]
+ *      description: Use this endpoint to verify account
+ *      requestBody:
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      $ref: '#/definitions/Verify'
+ *      responses:
+ *          200:
+ *              description: account verified
+ *          500:
+ *              description: Some error occured
+ */
+
 router.post('/verify', async (req, res) => {
     //get code + email
     const { email, code } = req.body;
@@ -103,6 +182,26 @@ router.post('/verify', async (req, res) => {
         })
     //update db false true
 });
+
+//LOGIN SWAGGER
+/**
+ * @swagger
+ * /api/account/login:
+ *  post:
+ *      summary: login to an account
+ *      tags: [Account]
+ *      description: Use this endpoint to login to an account
+ *      requestBody:
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      $ref: '#/definitions/Login'
+ *      responses:
+ *          200:
+ *              description: account logged in
+ *          500:
+ *              description: Some error occured
+ */
 
 router.post('/login', async (req, res) => {
     //get user loogin data
@@ -253,6 +352,20 @@ router.post('/update_password', async (req, res) => {
             });
         });
 });
+
+
+/**
+ * @swagger
+ * /api/account/getOverView:
+ *  get:
+ *      summary: get OverView
+ *      tags: [Account]
+ *      responses:
+ *          200:
+ *              description: return the application overView
+ *          500: 
+ *              description: some error occured
+ */
 
 router.get('/getOverView', Auth, async (req, res) => {
     return res.status(200).json({

@@ -3,8 +3,24 @@ const router = express.Router();
 import Account from '../models/account.js';
 import Company from '../models/company.js';
 import mongoose from 'mongoose';
-import bcryptjs from 'bcryptjs';
 import Auth from './auth.js';
+import { getDistance } from 'geolib';
+
+
+/**
+ * @swagger
+ * definitions:
+ *  get_companies_by_location:
+ *      type: object
+ *      properties:
+ *          latitude:
+ *              type: string
+ *              example: 31.736375
+ *          longitude:
+ *              type: string
+ *              example: 34.749102
+ */
+
 
 //update account
 router.post('/create_company', Auth, async (req, res) => {
@@ -105,12 +121,81 @@ router.post('/update_company', Auth, async (req, res) => {
 
 });
 
+
+/**
+ * @swagger
+ * /api/company/get_companies:
+ *  get:
+ *      summary: Use the endpoint to get all categories in DB
+ *      tags: [Company]
+ *      responses:
+ *          200:
+ *              description: return list of all categories
+ *          500:
+ *              description: Some error occured
+ */
+
 router.get('/get_companies', Auth, async (req, res) => {
 
     Company.find()
         .then(companies => {
             return res.status(200).json({
                 message: companies
+            });
+        })
+        .catch(err => {
+            return res.status(500).json({
+                message: err.message
+            });
+        })
+
+});
+
+
+/**
+ * @swagger
+ * /api/company/get_companies_by_location:
+ *  post:
+ *      summary: get all comapnies and your location from them
+ *      description: use this endpoint to get all companies and the distance from them
+ *      tags: [Company]
+ *      requestBody:
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      $ref: '#/definitions/get_companies_by_location'
+ *      responses:
+ *          200:
+ *              description: return a new list with the companies and your distance from them
+ *          500:
+ *              description: some error occured                 
+ */
+
+router.post('/get_companies_by_location', Auth, async (req, res) => {
+
+    const { latitude, longitude } = req.body;
+
+    Company.find()
+        .then(companies => {
+
+            let companiesWithLoc = [];
+
+            companies.forEach(company => {
+                const distance = getDistance(
+                    { latitude: company.contact.latitude, longitude: company.contact.longitude },
+                    { latitude: latitude, longitude: longitude }
+                )
+
+                companiesWithLoc.push({
+                    company_info: company,
+                    distance: distance
+                })
+            })
+
+
+
+            return res.status(200).json({
+                message: companiesWithLoc
             });
         })
         .catch(err => {

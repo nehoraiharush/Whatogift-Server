@@ -92,7 +92,7 @@ router.get('/get_brand_by_id/:id', async (req, res) => {
             })
         });
 });
-//POST BRAND SWAGGER
+//GET BRAND SWAGGER
 /**
  * @swagger
  * definitions:
@@ -127,8 +127,8 @@ router.get('/get_brand_by_id/:id', async (req, res) => {
  *          500:
  *              description: Error in create
  */
-//NEED TO RETURN THE AUTH
-router.post('/create_new_brand', async (req, res) => {
+
+router.post('/create_new_brand', Auth, async (req, res) => {
     const id = mongoose.Types.ObjectId();
 
     const { brandName, brandLogo } = req.body;
@@ -176,6 +176,24 @@ router.post('/create_new_brand', async (req, res) => {
         });
 
 });
+
+//GET ALL CATEGORIES
+/**
+ * @swagger
+ * /api/product/get_all_categories:
+ *  get:
+ *      summary: Return a list of all categories
+ *      tags: [Products]
+ *      responses: 
+ *          200:
+ *              description: This is the list of all categories
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: array
+ *          500:
+ *              description: Error was found
+ */
 
 router.get('/get_all_categories', async (req, res) => {
     Category.find()
