@@ -43,7 +43,40 @@ import Account from '../models/account.js';
  *              example: nehorai@gmail.com
  *          code:
  *              type: string
- *              example: 1234    
+ *              example: 1234
+ *  Update Account:
+ *      type: object
+ *      properties:
+ *          firstName:
+ *              type: string
+ *              example: nehorai
+ *          lastName:
+ *              type: string
+ *              example: harush
+ *          dob:
+ *              type: Date
+ *              example: 10/12/2003
+ *          gender:
+ *              type: string
+ *              example: Male
+ *          avatar:
+ *              type: string
+ *              example: https://res.cloudinary.com/united-app/image/upload/v1638879014/avatars/character4_vk2ven.png
+ *          address:
+ *              type: string
+ *              example: Arye Chimoke
+ *          city:
+ *              type: string
+ *              example: Kiryat Malachi
+ *          state:
+ *              type: string
+ *              example: Israel
+ *          zipCode:
+ *              type: string
+ *              example: 8302412
+ *          mobile:
+ *              type: string
+ *              example: 0526644569
  */
 
 //SIGNUP SWAGGER
@@ -245,7 +278,28 @@ router.post('/login', async (req, res) => {
         });
 });
 
+
+
 //update account details
+
+/**
+ * @swagger
+ * /api/account/update_account/:
+ *  post:
+ *      summary: Update an account
+ *      tags: [Account]
+ *      description: Use this endpoint to update the account info
+ *      requestBody:
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      $ref: '#/definitions/Update Account'
+ *      responses:
+ *          200:
+ *              description: Account updated
+ *          500: Some error occured
+ */
+
 router.post('/update_account', async (req, res) => {
 
     const email = req.body.email;
