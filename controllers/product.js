@@ -8,6 +8,8 @@ import Auth from './auth.js';
 import Brand from '../models/brand.js';
 import Category from '../models/category.js';
 import Product from '../models/product.js';
+import Company from '../models/company.js';
+import { getCompaniesWithLocation } from './company.js'
 
 
 //GET BRAND SWAGGER
@@ -308,7 +310,7 @@ router.post('/create_new_product', Auth, async (req, res) => {
     const id = mongoose.Types.ObjectId();
 
     const { companyId, categoryId, brandId, productName,
-        productImage, productPrice, productDescription, unitInStock } = req.body;
+        productImage, productPrice, productDescription, unitInStock, tags } = req.body;
 
     const _product = new Product({
         _id: id,
@@ -316,11 +318,15 @@ router.post('/create_new_product', Auth, async (req, res) => {
         categoryId: categoryId,
         brandId: brandId,
         productName: productName,
-        productImage: productImage,
+        productImage: [
+            {
+                imageSource: productImage
+            }],
         productPrice: productPrice,
         productDescription: productDescription,
         unitInStock: unitInStock,
-        reviews: []
+        reviews: [],
+        tags: tags
     })
     _product.save()
         .then(product_created => {
@@ -337,6 +343,64 @@ router.post('/create_new_product', Auth, async (req, res) => {
         });
 })
 
+
+router.get('/get_most_related_products', Auth, async (req, res) => {
+    const { locationRadius, latitude, longitude } = req.body;
+    //gender, age, event, relation, interest, budget,
+    let productsByCompanies = [];
+
+    let companiesId = [];
+    //COMPANY -- CHECKED
+    Company.find()
+        .then(companies => {
+            if (companies.length > 0) {
+                let companiesWithLoc = getCompaniesWithLocation(companies, latitude, longitude);
+                companiesWithLoc.forEach((company) => {
+                    if (company.distance <= locationRadius || company.company_info.type === "online") {
+                        companiesId.push(company.company_info._id);
+                    }
+                })
+                //PRODUCT -- CHECKED BUT NEED TO ADD MORE OF THE SORTING FIELDS
+                Product.find({ companyId: { $in: companiesId } })
+                    .then(products => {
+
+                        if (products.length > 0) {
+                            return res.status(200).json({
+                                status: true,
+                                message: products
+                            })
+                        } else {
+                            return res.status(200).json({
+                                status: false,
+                                message: "No products were found"
+                            })
+                        }
+                    })
+                    .catch(err => {
+                        return res.status(500).json({
+                            status: false,
+                            message: err.message
+                        })
+                    });
+
+            } else {
+                return res.status(200).json({
+                    status: false,
+                    message: "No Companies were found"
+                })
+            }
+        })
+        .catch(err => {
+            return res.status(500).json({
+                status: false,
+                message: err.message
+            })
+        });
+
+
+
+
+})
 
 
 router.delete('/delete_brand', Auth, async (req, res) => {

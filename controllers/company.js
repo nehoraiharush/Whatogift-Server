@@ -74,7 +74,7 @@ router.post('/update_company', Auth, async (req, res) => {
 
     const user = req.user;
     const { id, address, city, state, zipcode, mobile, latitude,
-        longitude, logo, bio } = req.body;
+        longitude, logo, bio, type } = req.body;
 
 
     const company = await Company.findById(id);
@@ -91,6 +91,7 @@ router.post('/update_company', Auth, async (req, res) => {
                     latitude: latitude,
                     longitude: longitude
                 },
+                type: type,
                 logo: logo,
                 bio: bio
             })
@@ -139,12 +140,21 @@ router.get('/get_companies', Auth, async (req, res) => {
 
     Company.find()
         .then(companies => {
-            return res.status(200).json({
-                message: companies
-            });
+            if (companies.length > 0) {
+                return res.status(200).json({
+                    status: true,
+                    message: companies
+                });
+            } else {
+                return res.status(200).json({
+                    status: false,
+                    message: "No Companies were found"
+                });
+            }
         })
         .catch(err => {
             return res.status(500).json({
+                status: false,
                 message: err.message
             });
         })
@@ -178,25 +188,19 @@ router.post('/get_companies_by_location', Auth, async (req, res) => {
     Company.find()
         .then(companies => {
 
-            let companiesWithLoc = [];
+            if (companies.length > 0) {
+                let companiesWithLoc = getCompaniesWithLocation(companies, latitude, longitude);
+                return res.status(200).json({
+                    status: true,
+                    message: companiesWithLoc
+                });
+            } else {
+                return res.status(200).json({
+                    status: false,
+                    message: "No companies were found"
+                });
+            }
 
-            companies.forEach(company => {
-                const distance = getDistance(
-                    { latitude: company.contact.latitude, longitude: company.contact.longitude },
-                    { latitude: latitude, longitude: longitude }
-                )
-
-                companiesWithLoc.push({
-                    company_info: company,
-                    distance: distance
-                })
-            })
-
-
-
-            return res.status(200).json({
-                message: companiesWithLoc
-            });
         })
         .catch(err => {
             return res.status(500).json({
@@ -205,6 +209,23 @@ router.post('/get_companies_by_location', Auth, async (req, res) => {
         })
 
 });
+
+export const getCompaniesWithLocation = (companies, latitude, longitude) => {
+    let companiesWithLoc = [];
+
+    companies.forEach(company => {
+        const distance = getDistance(
+            { latitude: company.contact.latitude, longitude: company.contact.longitude },
+            { latitude: latitude, longitude: longitude }
+        )
+
+        companiesWithLoc.push({
+            company_info: company,
+            distance: distance
+        })
+    })
+    return companiesWithLoc;
+}
 
 
 export default router;
