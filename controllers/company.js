@@ -40,7 +40,7 @@ router.post('/create_company', Auth, async (req, res) => {
     if (company.length > 0) {
         return res.status(200).json({
             status: false,
-            message: 'Company exist'
+            message: `${user.firstName} ${user.lastName} already has company exist`
         });
     } else {
         //CREATE COMPANY

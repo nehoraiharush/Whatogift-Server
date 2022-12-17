@@ -345,8 +345,8 @@ router.post('/create_new_product', Auth, async (req, res) => {
 
 
 router.get('/get_most_related_products', Auth, async (req, res) => {
-    const { locationRadius, latitude, longitude } = req.body;
-    //gender, age, event, relation, interest, budget,
+    const { locationRadius, latitude, longitude, budget, relation } = req.body;
+    //gender, age, event, interest,
     let productsByCompanies = [];
 
     let companiesId = [];
@@ -355,19 +355,40 @@ router.get('/get_most_related_products', Auth, async (req, res) => {
         .then(companies => {
             if (companies.length > 0) {
                 let companiesWithLoc = getCompaniesWithLocation(companies, latitude, longitude);
+
                 companiesWithLoc.forEach((company) => {
                     if (company.distance <= locationRadius || company.company_info.type === "online") {
                         companiesId.push(company.company_info._id);
                     }
                 })
+                //sorting by location and relation
+                if (relation <= 3)
+                    companiesWithLoc.sort((a, b) => b.distance - a.distance);
+                else
+                    companiesWithLoc.sort((a, b) => a.distance - b.distance);
+
+
                 //PRODUCT -- CHECKED BUT NEED TO ADD MORE OF THE SORTING FIELDS
-                Product.find({ companyId: { $in: companiesId } })
+                Product.find({
+                    //by distance - company
+                    companyId: { $in: companiesId },
+                    //by budget
+                    $or: [{ productPrice: { $lt: budget } }, { productPrice: budget }],
+                    //tags: { $in: [/.*son.*/i, /.*son.*/i] }
+                })
                     .then(products => {
 
                         if (products.length > 0) {
+
+                            //sort by budget and relation
+                            if (relation <= 3)
+                                productsByCompanies.push(...products.sort((c1, c2) => c2.productPrice - c1.productPrice));
+                            else
+                                productsByCompanies.push(...products.sort((c1, c2) => c1.productPrice - c2.productPrice));
+
                             return res.status(200).json({
                                 status: true,
-                                message: products
+                                message: productsByCompanies
                             })
                         } else {
                             return res.status(200).json({
