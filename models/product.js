@@ -15,6 +15,7 @@ const productSchema = new Schema({
     productPrice: Number,
     productDescription: String,
     unitInStock: Number,
+    targetAge: Number,
     reviews: [
         {
             associateId: { type: mongoose.Schema.Types.ObjectId, ref: 'Account', },
@@ -25,9 +26,10 @@ const productSchema = new Schema({
 
         }
     ],
-    tags: [{
-        type: String
-    }
+    tags: [
+        {
+            type: String
+        }
     ],
     createdAt: { type: Date, default: Date.now },
 

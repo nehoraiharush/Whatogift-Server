@@ -310,7 +310,7 @@ router.post('/create_new_product', Auth, async (req, res) => {
     const id = mongoose.Types.ObjectId();
 
     const { companyId, categoryId, brandId, productName,
-        productImage, productPrice, productDescription, unitInStock, tags } = req.body;
+        productImage, productPrice, productDescription, unitInStock, tags, targetAge } = req.body;
 
     const _product = new Product({
         _id: id,
@@ -326,7 +326,8 @@ router.post('/create_new_product', Auth, async (req, res) => {
         productDescription: productDescription,
         unitInStock: unitInStock,
         reviews: [],
-        tags: tags
+        tags: tags,
+        targetAge: targetAge
     })
     _product.save()
         .then(product_created => {
@@ -374,41 +375,10 @@ router.get('/get_most_related_products', Auth, async (req, res) => {
                     companyId: { $in: companiesId },
                     //by budget
                     productPrice: { $lte: budget },
+                    $or: [{ targetAge: { $lte: age } }, { targetAge: age + 5 }],
                     $or: [{ tags: { $in: interest.map((i) => new RegExp(i, 'i')) } },
                     { tags: { $in: event.map((i) => new RegExp(i, 'i')) } },
                     { tags: new RegExp(gender, 'i') },
-                        //NEED TO FIX THE AGE SEARCH
-                        // {
-                        //     "$expr": {
-                        //         "$allElementsTrue": {
-                        //             "$map": {
-                        //                 "input": "$tags",
-                        //                 "as": "t",
-                        //                 "in": {
-                        //                     "$cond": [
-                        //                         {
-                        //                             "$ne": [
-                        //                                 {
-                        //                                     "$type": "$$t"
-                        //                                 },
-                        //                                 "missing"
-                        //                             ]
-                        //                         },
-                        //                         {
-                        //                             "$gt": [
-                        //                                 {
-                        //                                     "$toInt": "$$t"
-                        //                                 },
-                        //                                 0
-                        //                             ]
-                        //                         },
-                        //                         true
-                        //                     ]
-                        //                 }
-                        //             }
-                        //         }
-                        //     }
-                        // }
                     ],
                     $or: [{ productDescription: { $in: interest.map((i) => new RegExp(i, 'i')) } },
                     { productDescription: { $in: event.map((i) => new RegExp(i, 'i')) } },
