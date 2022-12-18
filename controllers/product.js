@@ -284,6 +284,7 @@ router.post('/create_new_category', Auth, async (req, res) => {
  */
 
 router.get('/get_all_products', async (req, res) => {
+    console.log(req.body)
     Product.find()
         .then(products_exist => {
             if (products_exist.length > 0) {
@@ -346,6 +347,7 @@ router.post('/create_new_product', Auth, async (req, res) => {
 
 
 router.get('/get_most_related_products', Auth, async (req, res) => {
+
     const { locationRadius, latitude, longitude, budget, relation, interest, event, gender, age } = req.body;
 
     let productsByCompanies = [];
