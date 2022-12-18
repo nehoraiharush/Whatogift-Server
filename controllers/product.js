@@ -345,8 +345,8 @@ router.post('/create_new_product', Auth, async (req, res) => {
 
 
 router.get('/get_most_related_products', Auth, async (req, res) => {
-    const { locationRadius, latitude, longitude, budget, relation } = req.body;
-    //gender, age, event, interest,
+    const { locationRadius, latitude, longitude, budget, relation, interest, event, gender, age } = req.body;
+
     let productsByCompanies = [];
 
     let companiesId = [];
@@ -373,8 +373,46 @@ router.get('/get_most_related_products', Auth, async (req, res) => {
                     //by distance - company
                     companyId: { $in: companiesId },
                     //by budget
-                    $or: [{ productPrice: { $lt: budget } }, { productPrice: budget }],
-                    //tags: { $in: [/.*son.*/i, /.*son.*/i] }
+                    productPrice: { $lte: budget },
+                    $or: [{ tags: { $in: interest.map((i) => new RegExp(i, 'i')) } },
+                    { tags: { $in: event.map((i) => new RegExp(i, 'i')) } },
+                    { tags: new RegExp(gender, 'i') },
+                        //NEED TO FIX THE AGE SEARCH
+                        // {
+                        //     "$expr": {
+                        //         "$allElementsTrue": {
+                        //             "$map": {
+                        //                 "input": "$tags",
+                        //                 "as": "t",
+                        //                 "in": {
+                        //                     "$cond": [
+                        //                         {
+                        //                             "$ne": [
+                        //                                 {
+                        //                                     "$type": "$$t"
+                        //                                 },
+                        //                                 "missing"
+                        //                             ]
+                        //                         },
+                        //                         {
+                        //                             "$gt": [
+                        //                                 {
+                        //                                     "$toInt": "$$t"
+                        //                                 },
+                        //                                 0
+                        //                             ]
+                        //                         },
+                        //                         true
+                        //                     ]
+                        //                 }
+                        //             }
+                        //         }
+                        //     }
+                        // }
+                    ],
+                    $or: [{ productDescription: { $in: interest.map((i) => new RegExp(i, 'i')) } },
+                    { productDescription: { $in: event.map((i) => new RegExp(i, 'i')) } },
+                    { productDescription: new RegExp(gender, 'i') },]
                 })
                     .then(products => {
 
@@ -388,12 +426,13 @@ router.get('/get_most_related_products', Auth, async (req, res) => {
 
                             return res.status(200).json({
                                 status: true,
+                                productsFound: productsByCompanies.length,
                                 message: productsByCompanies
                             })
                         } else {
                             return res.status(200).json({
                                 status: false,
-                                message: "No products were found"
+                                message: "No products were found please change your filters"
                             })
                         }
                     })
