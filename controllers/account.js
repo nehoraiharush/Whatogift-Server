@@ -103,14 +103,7 @@ import Account from '../models/account.js';
 router.post('/signUp', async (req, res) => {
 
     const _id = mongoose.Types.ObjectId();
-    const { firstName, lastName, email, password } = req.body;
-    //check if feilds now empty
-    if (email == '' || password == '' || lastName == '' || firstName == '') {
-        return res.status(200).json({
-            status: false,
-            message: 'One field or more are missing'
-        });
-    }
+    const { firstName, lastName, email, password, uid } = req.body;
 
     //check if account exist
     Account.findOne({ email: email })
@@ -131,13 +124,21 @@ router.post('/signUp', async (req, res) => {
                     password: hash,
                     firstName: firstName,
                     lastName: lastName,
-                    passcode: code
+                    passcode: code,
+                    uid: uid
                 })
                 _account.save()
-                    .then(account_created => {
+                    .then(async account_created => {
+
+                        const keyToken = 'm1eIkEjW6Jl64pYbuXsrXixLJpfupNbT';
+                        const data = { account_created };
+                        //generate jwt token
+                        const token = await jwt.sign(data, keyToken);
+
                         return res.status(200).json({
                             status: true,
-                            message: account_created
+                            message: account_created,
+                            token: token
                         });
                     })
                     .catch(err => {
@@ -284,7 +285,7 @@ router.post('/login', async (req, res) => {
 
 /**
  * @swagger
- * /api/account/update_account/:
+ * /api/account/update_account:
  *  post:
  *      summary: Update an account
  *      tags: [Account]
@@ -297,7 +298,8 @@ router.post('/login', async (req, res) => {
  *      responses:
  *          200:
  *              description: Account updated
- *          500: Some error occured
+ *          500: 
+ *              description: Some error occured
  */
 
 router.post('/update_account', async (req, res) => {

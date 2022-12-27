@@ -26,9 +26,14 @@ const productSchema = new Schema({
 
         }
     ],
-    tags: [
+    eventsTags: [
         {
-            type: String
+            name: String
+        }
+    ],
+    interestsTags: [
+        {
+            name: String
         }
     ],
     createdAt: { type: Date, default: Date.now },
