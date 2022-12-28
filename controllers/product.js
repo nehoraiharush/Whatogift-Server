@@ -383,7 +383,6 @@ router.put('/update_category/:id', Auth, async (req, res) => {
  */
 
 router.post('/get_all_products', async (req, res) => {
-    console.log(req.body)
     Product.find()
         .populate('companyId')
         .populate('brandId')
