@@ -128,16 +128,16 @@ router.post('/signUp', async (req, res) => {
                     uid: uid
                 })
                 _account.save()
-                    .then(async account_created => {
+                    .then(async account => {
 
                         const keyToken = 'm1eIkEjW6Jl64pYbuXsrXixLJpfupNbT';
-                        const data = { account_created };
+                        const data = { account };
                         //generate jwt token
                         const token = await jwt.sign(data, keyToken);
 
                         return res.status(200).json({
                             status: true,
-                            message: account_created,
+                            message: account,
                             token: token
                         });
                     })

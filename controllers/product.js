@@ -383,22 +383,45 @@ router.put('/update_category/:id', Auth, async (req, res) => {
  */
 
 router.post('/get_all_products', async (req, res) => {
-    Product.find()
-        .populate('companyId')
-        .populate('brandId')
-        .populate('categoryId')
-        .then(products_exist => {
-            if (products_exist.length > 0) {
-                return res.status(200).json({
-                    status: true,
-                    message: products_exist
+    Company.find()
+        .then(companies => {
+            const companiesWithDistance = getCompaniesWithLocation(companies, req.body.latitude, req.body.longitude);
+            Product.find()
+                .populate('companyId')
+                .populate('brandId')
+                .populate('categoryId')
+                .then(products_exist => {
+                    const productsWithDistance = [];
+                    products_exist.forEach(product => {
+                        companiesWithDistance.forEach(company => {
+                            if (JSON.stringify(product.companyId._id) === JSON.stringify(company.company_info._id)) {
+                                console.log("GG")
+                                productsWithDistance.push({
+                                    product: product,
+                                    distance: company.distance
+                                })
+                            }
+                        })
+                    })
+                    console.log(productsWithDistance)
+                    if (products_exist.length > 0) {
+                        return res.status(200).json({
+                            status: true,
+                            message: productsWithDistance
+                        })
+                    } else {
+                        return res.status(200).json({
+                            status: false,
+                            message: 'No Products exist'
+                        })
+                    }
                 })
-            } else {
-                return res.status(200).json({
-                    status: false,
-                    message: 'No Products exist'
-                })
-            }
+                .catch(err => {
+                    return res.status(500).json({
+                        status: false,
+                        message: err.message
+                    })
+                });
         })
         .catch(err => {
             return res.status(500).json({
@@ -406,6 +429,7 @@ router.post('/get_all_products', async (req, res) => {
                 message: err.message
             })
         });
+
 });
 
 //CREATE NEW PRODUCT

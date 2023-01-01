@@ -11,7 +11,7 @@ export default (req, res, next) => {
             if (err) {
                 return res.sendStatus(403);
             } else {
-                Account.findById(authData.account_created._id)
+                Account.findById(authData.account._id)
                     .then(user => {
                         req.user = user;
                         next();
