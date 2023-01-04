@@ -395,7 +395,6 @@ router.post('/get_all_products', async (req, res) => {
                     products_exist.forEach(product => {
                         companiesWithDistance.forEach(company => {
                             if (JSON.stringify(product.companyId._id) === JSON.stringify(company.company_info._id)) {
-                                console.log("GG")
                                 productsWithDistance.push({
                                     product: product,
                                     distance: company.distance
@@ -403,7 +402,6 @@ router.post('/get_all_products', async (req, res) => {
                             }
                         })
                     })
-                    console.log(productsWithDistance)
                     if (products_exist.length > 0) {
                         return res.status(200).json({
                             status: true,
@@ -557,7 +555,6 @@ router.post('/get_most_related_products', Auth, async (req, res) => {
                         }
                     })
                     .catch(err => {
-                        console.log("gffg")
                         return res.status(500).json({
                             status: false,
                             message: err.message

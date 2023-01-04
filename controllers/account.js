@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import Auth from './auth.js';
 
 import Account from '../models/account.js';
+import e from 'express';
 
 //DEFINITIONS
 /**
@@ -125,7 +126,8 @@ router.post('/signUp', async (req, res) => {
                     firstName: firstName,
                     lastName: lastName,
                     passcode: code,
-                    uid: uid
+                    uid: uid,
+                    favorites: []
                 })
                 _account.save()
                     .then(async account => {
@@ -407,6 +409,63 @@ router.post('/update_password', async (req, res) => {
                 message: err.message
             });
         });
+});
+
+router.post('/add_to_favorites', Auth, async (req, res) => {
+
+
+    const favorite_id = req.body.favorites;
+    const user = req.user;
+    const typeOfAction = req.body.typeOfAction;
+
+    // console.log(favorite_id);
+    // console.log(user);
+
+    Account.findById(user._id)
+        .then(account => {
+            if (account) {
+                const user_favorites = account.favorites;
+                let final_favorites = []
+                if (typeOfAction)
+                    final_favorites = [...user_favorites, favorite_id];
+                else if (!typeOfAction) {
+                    user_favorites.forEach((favorite) => {
+                        if (JSON.stringify(favorite) !== JSON.stringify(favorite_id))
+                            final_favorites.push(favorite);
+                    });
+                } else {
+                    final_favorites = user_favorites;
+                }
+                console.log(final_favorites)
+                account.updateOne({
+                    favorites: final_favorites
+                })
+                    .then(account_updated => {
+                        return res.status(200).json({
+                            status: true,
+                            message: account_updated
+                        });
+                    })
+                    .catch(err => {
+                        return res.status(500).json({
+                            status: false,
+                            message: err.message
+                        });
+                    });
+            } else {
+                return res.status(200).json({
+                    status: false,
+                    message: 'Account not exist'
+                });
+            }
+        })
+        .catch(err => {
+            return res.status(500).json({
+                status: false,
+                message: err.message
+            });
+        });
+
 });
 
 

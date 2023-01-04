@@ -15,6 +15,9 @@ const accountSchema = new Schema({
     avatar: { type: String, default: 'https://res.cloudinary.com/united-app/image/upload/v1638879014/avatars/character4_vk2ven.png' },
     isVerified: { type: Boolean, default: false },
     passcode: Number,
+    favorites: [
+        { type: String }
+    ],
     contact: {
         address: String,
         city: String,
