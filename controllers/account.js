@@ -411,47 +411,87 @@ router.post('/update_password', async (req, res) => {
         });
 });
 
-router.post('/add_to_favorites', Auth, async (req, res) => {
 
+router.get('/get_wishlist', Auth, async (req, res) => {
+
+    console.log(req.user);
+    const user = req.user;
+    Account.findById(user._id)
+        .then(account => {
+            if (account) {
+
+                const favorites = account.favorites;
+                if (favorites.length > 0) {
+                    return res.status(200).json({
+                        status: true,
+                        message: favorites
+                    });
+                } else {
+                    return res.status(200).json({
+                        status: true,
+                        message: []
+                    });
+                }
+            } else {
+                return res.status(200).json({
+                    status: false,
+                    message: "User Not Exist"
+                });
+            }
+        })
+        .catch(err => {
+            return res.status(500).json({
+                status: false,
+                message: err.message
+            });
+        });
+
+});
+
+
+router.post('/add_to_favorites', Auth, async (req, res) => {
 
     const favorite_id = req.body.favorites;
     const user = req.user;
     const typeOfAction = req.body.typeOfAction;
-
-    // console.log(favorite_id);
-    // console.log(user);
 
     Account.findById(user._id)
         .then(account => {
             if (account) {
                 const user_favorites = account.favorites;
                 let final_favorites = []
-                if (typeOfAction)
-                    final_favorites = [...user_favorites, favorite_id];
-                else if (!typeOfAction) {
-                    user_favorites.forEach((favorite) => {
-                        if (JSON.stringify(favorite) !== JSON.stringify(favorite_id))
-                            final_favorites.push(favorite);
-                    });
-                } else {
-                    final_favorites = user_favorites;
-                }
-                console.log(final_favorites)
-                account.updateOne({
-                    favorites: final_favorites
-                })
-                    .then(account_updated => {
-                        return res.status(200).json({
-                            status: true,
-                            message: account_updated
+                const exist = user_favorites.includes(JSON.stringify(favorite_id));
+                if (!exist || !typeOfAction) {
+                    if (typeOfAction)
+                        final_favorites = [...user_favorites, favorite_id];
+                    else {
+                        user_favorites.forEach((favorite) => {
+                            if (JSON.stringify(favorite) !== JSON.stringify(favorite_id))
+                                final_favorites.push(favorite);
                         });
+                    }
+                    console.log(final_favorites.length)
+                    console.log(final_favorites)
+                    account.updateOne({
+                        favorites: final_favorites
                     })
-                    .catch(err => {
-                        return res.status(500).json({
-                            status: false,
-                            message: err.message
+                        .then(account_updated => {
+                            return res.status(200).json({
+                                status: true,
+                                message: account_updated
+                            });
+                        })
+                        .catch(err => {
+                            return res.status(500).json({
+                                status: false,
+                                message: err.message
+                            });
                         });
-                    });
+
+                } else {
+                    console.log("Product exist")
+                }
+
             } else {
                 return res.status(200).json({
                     status: false,
