@@ -414,7 +414,6 @@ router.post('/update_password', async (req, res) => {
 
 router.get('/get_wishlist', Auth, async (req, res) => {
 
-    console.log(req.user);
     const user = req.user;
     Account.findById(user._id)
         .then(account => {
