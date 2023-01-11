@@ -452,44 +452,40 @@ router.post('/add_to_favorites', Auth, async (req, res) => {
 
     const favorite_id = req.body.favorites;
     const user = req.user;
-    const typeOfAction = req.body.typeOfAction;
 
     Account.findById(user._id)
         .then(account => {
             if (account) {
                 const user_favorites = account.favorites;
                 let final_favorites = []
-                const exist = user_favorites.includes(JSON.stringify(favorite_id));
-                if (!exist || !typeOfAction) {
-                    if (typeOfAction)
-                        final_favorites = [...user_favorites, favorite_id];
-                    else {
-                        user_favorites.forEach((favorite) => {
-                            if (JSON.stringify(favorite) !== JSON.stringify(favorite_id))
-                                final_favorites.push(favorite);
-                        });
-                    }
-                    console.log(final_favorites.length)
-                    console.log(final_favorites)
-                    account.updateOne({
-                        favorites: final_favorites
-                    })
-                        .then(account_updated => {
-                            return res.status(200).json({
-                                status: true,
-                                message: account_updated
-                            });
-                        })
-                        .catch(err => {
-                            return res.status(500).json({
-                                status: false,
-                                message: err.message
-                            });
-                        });
+                const exist = user_favorites.filter((x) => JSON.stringify(x) === JSON.stringify(favorite_id));
+                if (exist.length === 0) {
+
+                    final_favorites = [...user_favorites, favorite_id];
 
                 } else {
-                    console.log("Product exist")
+                    user_favorites.forEach((favorite) => {
+                        if (JSON.stringify(favorite) !== JSON.stringify(favorite_id))
+                            final_favorites.push(favorite);
+                    });
                 }
+                console.log(final_favorites.length);
+                console.log(final_favorites);
+                account.updateOne({
+                    favorites: final_favorites
+                })
+                    .then(account_updated => {
+                        return res.status(200).json({
+                            status: true,
+                            message: account_updated
+                        });
+                    })
+                    .catch(err => {
+                        return res.status(500).json({
+                            status: false,
+                            message: err.message
+                        });
+                    });
 
             } else {
                 return res.status(200).json({
@@ -522,8 +518,10 @@ router.post('/add_to_favorites', Auth, async (req, res) => {
  */
 
 router.get('/getOverView', Auth, async (req, res) => {
+    console.log(req.user)
     return res.status(200).json({
-        message: `hello ${req.user.firstName} ${req.user.lastName}`
+        status: true,
+        message: req.user
     });
 });
 
