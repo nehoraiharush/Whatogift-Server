@@ -412,42 +412,6 @@ router.post('/update_password', async (req, res) => {
 });
 
 
-router.get('/get_wishlist', Auth, async (req, res) => {
-
-    const user = req.user;
-    Account.findById(user._id)
-        .then(account => {
-            if (account) {
-
-                const favorites = account.favorites;
-                if (favorites.length > 0) {
-                    return res.status(200).json({
-                        status: true,
-                        message: favorites
-                    });
-                } else {
-                    return res.status(200).json({
-                        status: true,
-                        message: []
-                    });
-                }
-            } else {
-                return res.status(200).json({
-                    status: false,
-                    message: "User Not Exist"
-                });
-            }
-        })
-        .catch(err => {
-            return res.status(500).json({
-                status: false,
-                message: err.message
-            });
-        });
-
-});
-
-
 router.post('/add_to_favorites', Auth, async (req, res) => {
 
     const favorite_id = req.body.favorites;
@@ -518,7 +482,6 @@ router.post('/add_to_favorites', Auth, async (req, res) => {
  */
 
 router.get('/getOverView', Auth, async (req, res) => {
-    console.log(req.user)
     return res.status(200).json({
         status: true,
         message: req.user
