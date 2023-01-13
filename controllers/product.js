@@ -383,6 +383,7 @@ router.put('/update_category/:id', Auth, async (req, res) => {
  */
 
 router.post('/get_all_products', async (req, res) => {
+
     Company.find()
         .then(companies => {
             const companiesWithDistance = getCompaniesWithLocation(companies, req.body.latitude, req.body.longitude);
