@@ -308,7 +308,6 @@ router.post('/update_account', async (req, res) => {
 
     const email = req.body.email;
     const password = req.body.password;
-
     const { firstName, lastName, dob, gender, avatar,
         address, city, state, zipCode, mobile } = req.body;
 
@@ -316,7 +315,7 @@ router.post('/update_account', async (req, res) => {
         .then(async account => {
 
             const isMatch = await bcryptjs.compare(password, account.password);
-            if (isMatch && account.isVerified) {
+            if (JSON.stringify(password) === JSON.stringify(account.password) && account.isVerified) {
                 account.updateOne({
                     firstName: firstName,
                     lastName: lastName,
@@ -433,8 +432,6 @@ router.post('/add_to_favorites', Auth, async (req, res) => {
                             final_favorites.push(favorite);
                     });
                 }
-                console.log(final_favorites.length);
-                console.log(final_favorites);
                 account.updateOne({
                     favorites: final_favorites
                 })
